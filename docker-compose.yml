@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  user-service:
+    build: ./user-service
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_DSN=postgres://postgres:P@ssw0rd@userdb:5432/userdb?sslmode=disable
+      - JWT_SECRET=your_jwt_secret
+    depends_on:
+      - userdb
+
+  order-service:
+    build: ./order-service
+    ports:
+      - "8081:8081"
+    environment:
+      - DB_DSN=postgres://postgres:P@ssw0rd@orderdb:5432/orderdb?sslmode=disable
+      - JWT_SECRET=your_jwt_secret
+    depends_on:
+      - orderdb
+    links:
+      - user-service
+
+  client-service:
+    build: ./client-service
+    ports:
+      - "8082:8082"
+    environment:
+      - DB_DSN=postgres://postgres:P@ssw0rd@clientdb:5432/clientdb?sslmode=disable
+      - JWT_SECRET=your_jwt_secret
+    depends_on:
+      - clientdb
+    links:
+      - user-service
+      - order-service
+
+  userdb:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: P@ssw0rd
+      POSTGRES_DB: userdb
+    ports:
+      - "5432:5432"
+
+  orderdb:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: P@ssw0rd
+      POSTGRES_DB: orderdb
+    ports:
+      - "5433:5432"
+
+  clientdb:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: P@ssw0rd
+      POSTGRES_DB: clientdb
+    ports:
+      - "5434:5432"
